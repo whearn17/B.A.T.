@@ -1,1 +1,1 @@
-# B.A.T.
+# B.A.T. - BEC Analysis Toolkit
