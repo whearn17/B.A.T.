@@ -1,12 +1,15 @@
 param (
     [Parameter(Mandatory = $true)]
-    [string]$OutputDirectory
+    [string]$OutputDirectory,
+
+    [Parameter(Mandatory = $true)]
+    [string]$MessageIDFile
 )
 
 . .\Search-Functions.ps1
 . .\OutlookAPI.ps1
 
-$messageIDs = Get-Content ".\mids.txt"
+$messageIDs = Get-Content $MessageIDFile
 
 Write-Host "`n`nSearching for $(($messageIDs).Count) message ID(s)`n"
 
