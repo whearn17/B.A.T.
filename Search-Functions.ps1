@@ -53,7 +53,7 @@ function Search-ForMessageIDsInOutlook {
     # Create a hashtable for faster lookup
     $targetIDsHash = @{}
     foreach ($id in $TargetMessageIDs) {
-        $targetIDsHash[$id.ToLower()] = $true
+        $targetIDsHash[$id.ToLower()] = $false  # Initialize with 'false' indicating not yet found
     }
 
     # Ensure the output directory exists
@@ -65,7 +65,7 @@ function Search-ForMessageIDsInOutlook {
     foreach ($folder in $allFolders) {
         # Iterate over each mail item in the folder
         foreach ($mail in $folder.Items) {
-            # Check if the item is an email
+            # Check if the item is an email or calendar invite
             if ($mail.MessageClass -eq "IPM.Note" -or $mail.MessageClass -like "IPM.Schedule.Meeting.*") {
                 # Extract the header and search for Message-ID
                 $header = $mail.PropertyAccessor.GetProperty("http://schemas.microsoft.com/mapi/proptag/0x007D001E")
@@ -76,9 +76,23 @@ function Search-ForMessageIDsInOutlook {
                         Write-Host "[+] Matched Message-ID: $foundID in folder: $($folder.Name)" -ForegroundColor Green
 
                         Save-MailItemAsMsg -MailItem $mail -OutputPath $OutputDirectory
+                        
+                        $targetIDsHash[$foundID] = $true  # Mark as found
                     }
                 }
             }
         }
+    }
+    
+    # Report any MessageIDs that weren't found
+    $notFoundMessageIDs = $targetIDsHash.Keys | Where-Object { $targetIDsHash[$_] -eq $false }
+    if ($notFoundMessageIDs.Count -gt 0) {
+        Write-Host "The following Message-IDs were not found:" -ForegroundColor Yellow
+        $notFoundMessageIDs | ForEach-Object {
+            Write-Host "[-] $_" -ForegroundColor Red
+        }
+    }
+    else {
+        Write-Host "All provided Message-IDs were found." -ForegroundColor Green
     }
 }
