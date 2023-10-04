@@ -83,9 +83,6 @@ function Search-ForMessageIDsInOutlook {
                             }
                         }
                     }
-                    else {
-                        Write-Host "[-] PropertyAccessor is null for mail with subject: $($mail.Subject)" -ForegroundColor Red
-                    }
                 }
             }            
         }
