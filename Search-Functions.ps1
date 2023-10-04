@@ -34,7 +34,7 @@ function Save-MailItemAsMsg {
 function Search-ForMessageIDsInOutlook {
     param (
         [Parameter(Mandatory = $true)]
-        [System.__ComObject]$PST,
+        [System.__ComObject[]]$PST,
 
         [Parameter(Mandatory = $true)]
         [string[]]$TargetMessageIDs,
@@ -42,11 +42,6 @@ function Search-ForMessageIDsInOutlook {
         [Parameter(Mandatory = $true)]
         [string]$OutputDirectory
     )
-
-    $rootFolder = $PST.GetRootFolder()
-
-    # Get all folders, including nested ones
-    $allFolders = Get-PSTFoldersRecursive -Folder $rootFolder
 
     $MessageIDPattern = "Message-ID:\s*<([^>]+)>"
 
@@ -61,26 +56,38 @@ function Search-ForMessageIDsInOutlook {
         New-Item -Path $OutputDirectory -ItemType Directory
     }
 
-    # Iterate over all folders
-    foreach ($folder in $allFolders) {
-        # Iterate over each mail item in the folder
-        foreach ($mail in $folder.Items) {
-            # Check if the item is an email or calendar invite
-            if ($mail.MessageClass -eq "IPM.Note" -or $mail.MessageClass -like "IPM.Schedule.Meeting.*") {
-                # Extract the header and search for Message-ID
-                $header = $mail.PropertyAccessor.GetProperty("http://schemas.microsoft.com/mapi/proptag/0x007D001E")
-                if ($header -match $MessageIDPattern) {
-                    $foundID = $matches[1].ToLower()  # Convert found ID to lowercase
-                    # Check if found ID matches any in the provided list
-                    if ($targetIDsHash.ContainsKey($foundID)) {
-                        Write-Host "[+] Matched Message-ID: $foundID in folder: $($folder.Name)" -ForegroundColor Green
+    # Iterate over all provided PSTs
+    foreach ($PST in $PSTs) {
+        $rootFolder = $PST.GetRootFolder()
 
-                        Save-MailItemAsMsg -MailItem $mail -OutputPath $OutputDirectory
-                        
-                        $targetIDsHash[$foundID] = $true  # Mark as found
+        # Get all folders, including nested ones
+        $allFolders = Get-PSTFoldersRecursive -Folder $rootFolder
+
+        # Iterate over all folders
+        foreach ($folder in $allFolders) {
+            # Iterate over each mail item in the folder
+            foreach ($mail in $folder.Items) {
+                # Check if the item is an email or calendar invite
+                if ($mail.MessageClass -eq "IPM.Note" -or $mail.MessageClass -like "IPM.Schedule.Meeting.*") {
+                    # Ensure PropertyAccessor is available
+                    if ($null -ne $mail.PropertyAccessor) {
+                        # Extract the header and search for Message-ID
+                        $header = $mail.PropertyAccessor.GetProperty("http://schemas.microsoft.com/mapi/proptag/0x007D001E")
+                        if ($header -match $MessageIDPattern) {
+                            $foundID = $matches[1].ToLower()  # Convert found ID to lowercase
+                            # Check if found ID matches any in the provided list
+                            if ($targetIDsHash.ContainsKey($foundID)) {
+                                Write-Host "[+] Matched Message-ID: $foundID in folder: $($folder.Name)" -ForegroundColor Green
+                                Save-MailItemAsMsg -MailItem $mail -OutputPath $OutputDirectory
+                                $targetIDsHash[$foundID] = $true  # Mark as found
+                            }
+                        }
+                    }
+                    else {
+                        Write-Host "[-] PropertyAccessor is null for mail with subject: $($mail.Subject)" -ForegroundColor Red
                     }
                 }
-            }
+            }            
         }
     }
     
