@@ -18,9 +18,9 @@ $OutlookApp = New-OutlookComObject
 
 $PSTs = Get-OutlookConnectedPSTs $OutlookApp
 
-foreach ($PST in $PSTs) {
-    Search-ForMessageIDsInOutlook -PST $PST -TargetMessageIDs $messageIDs -OutputDirectory $OutputDirectory
-}
+Write-Host "`nAttached PSTs:`n$($PSTs | ForEach-Object { $_.DisplayName } | Out-String)"
+
+Search-ForMessageIDsInOutlook -PST $PSTs -TargetMessageIDs $messageIDs -OutputDirectory $OutputDirectory
 
 
 Remove-OutlookComObject $OutlookApp
