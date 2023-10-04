@@ -24,7 +24,7 @@ function Save-MailItemAsMsg {
     )
 
     # Create a unique filename for the mail item
-    $filenameBase = ("{0}-{1}" -f $MailItem.Subject, $MailItem.EntryID) -replace '[\W]', '_'
+    $filenameBase = ("{0}-{1}" -f $MailItem.Subject, [System.Guid]::NewGuid()) -replace '[\W]', '_'
     $filename = "$filenameBase.msg"
 
     $filepath = Join-Path -Path $OutputPath -ChildPath $filename
