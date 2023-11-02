@@ -39,6 +39,11 @@ function main {
 
     # If the user wants to save to a PST
     if (-not($PSTDisplayName -eq "")) {
+
+        if (-not(Test-Path ".\Data")) {
+            mkdir Data | Out-Null
+        }
+
         Write-ScreenLog -Message "`nCreating new PST -> $($PSTDisplayName)" -Level info
 
         $TargetPST = New-PST -OutlookApp $OutlookApp -PSTDisplayName $PSTDisplayName
@@ -52,17 +57,18 @@ function main {
 }
 
 
-try {
-    main 
-}
-catch {
+# try {
+#     main 
+# }
+# catch {
 
-    Write-ScreenLog -Message "$($_)" -Level "fatal"
-    try {
-        Remove-OutlookComObject $OutlookApp
-    }
-    catch {
-        exit
-    }
+#     Write-ScreenLog -Message "$($_)" -Level "fatal"
+#     try {
+#         Remove-OutlookComObject $OutlookApp
+#     }
+#     catch {
+#         exit
+#     }
     
-}
+# }
+main
