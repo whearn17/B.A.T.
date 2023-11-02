@@ -1,6 +1,3 @@
-Import-Module ..\OutlookAPI\OutlookAPI.psm1
-Import-Module ..\Logging\Logging.psm1
-
 function Get-PSTFoldersRecursive {
     param (
         [Parameter(Mandatory = $true)]
