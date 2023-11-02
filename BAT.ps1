@@ -1,26 +1,68 @@
 param (
-    [Parameter(Mandatory = $true)]
-    [string]$OutputDirectory,
+    [Parameter(Mandatory = $false)]
+    [string]$PSTDisplayName,
 
     [Parameter(Mandatory = $true)]
     [string]$MessageIDFile
 )
 
-. .\Search-Functions.ps1
-. .\OutlookAPI.ps1
+Import-Module .\Modules\OutlookAPI\OutlookAPI.psm1
+Import-Module .\Modules\SearchFunctions\SearchFunctions.psm1
+Import-Module .\Modules\Logging\Logging.psm1
+function main {
+    if (-not(Test-Path $MessageIDFile)) {
+        throw "MessageIDFile does not exist -> $($MessageIDFile)"
+    }
 
-$messageIDs = Get-Content $MessageIDFile
+    $messageIDs = Get-Content $MessageIDFile
 
-Write-Host "`n`nSearching for $(($messageIDs).Count) message ID(s)`n"
+    if ([string]::IsNullOrEmpty($messageIDs)) {
+        throw "MessageIDFile is empty"
+    }
+
+    Write-ScreenLog -Message "`n`nSearching for $(($messageIDs).Count) message ID(s)`n" -Level "info"
+    
+    $OutlookApp = New-OutlookComObject
+
+    # If the Outlook GUI is open
+    if ($OutlookApp.Explorers.Count -gt 0) {
+        throw "Please close the Outlook GUI (No need to close background process)"
+    }
+
+    if ($null -eq $OutlookApp) {
+        throw "Failed to create Outlook Com Object"
+    }
+
+    $PSTs = Get-OutlookConnectedPSTs $OutlookApp
+
+    Write-ScreenLog -Message "`nAttached PSTs:`n$($PSTs | ForEach-Object { $_.DisplayName } | Out-String)" -Level "info"
+
+    # If the user wants to save to a PST
+    if (-not($PSTDisplayName -eq "")) {
+        Write-ScreenLog -Message "`nCreating new PST -> $($PSTDisplayName)" -Level info
+
+        $TargetPST = New-PST -OutlookApp $OutlookApp -PSTDisplayName $PSTDisplayName
+
+        Search-ForMessageIDsInOutlook -PSTs $PSTs -TargetMessageIDs $messageIDs -TargetPST $TargetPST
+    }
+    # If the user does not want to save to a PST
+    else {
+        Search-ForMessageIDsInOutlook -PSTs $PSTs -TargetMessageIDs $messageIDs
+    }   
+}
 
 
-$OutlookApp = New-OutlookComObject
+try {
+    main 
+}
+catch {
 
-$PSTs = Get-OutlookConnectedPSTs $OutlookApp
-
-Write-Host "`nAttached PSTs:`n$($PSTs | ForEach-Object { $_.DisplayName } | Out-String)"
-
-Search-ForMessageIDsInOutlook -PST $PSTs -TargetMessageIDs $messageIDs -OutputDirectory $OutputDirectory
-
-
-Remove-OutlookComObject $OutlookApp
+    Write-ScreenLog -Message "$($_)" -Level "fatal"
+    try {
+        Remove-OutlookComObject $OutlookApp
+    }
+    catch {
+        exit
+    }
+    
+}
