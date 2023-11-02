@@ -76,8 +76,9 @@ function New-PST {
     $PST = $OutlookApp.Session.Stores | Where-Object { $_.DisplayName -eq $PSTDisplayName }
 
     # Create PSTPath
-    $PSTPath = "C:\temp\$($PSTDisplayName).pst"
+    $PSTPath = "$(Get-Location)\Data\$($PSTDisplayName).pst"
 
+    # If PST was not already found
     if ($null -eq $PST) {
         # Add the PST to Outlook
         $OutlookApp.Session.AddStoreEx($PSTPath, 2)  # 2 is for olStoreDefault, making it a default store type
