@@ -16,3 +16,4 @@
 * Log file
 * CSV Output
 * Documentation
+* Skip messages if they already been found
