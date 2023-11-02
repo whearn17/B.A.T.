@@ -57,18 +57,26 @@ function main {
 }
 
 
-# try {
-#     main 
-# }
-# catch {
+try {
+    main
+}
+catch {
+    # Get the error type name and stack trace
+    $errorTypeName = $_.Exception.GetType().FullName
+    $errorStackTrace = $_.Exception.StackTrace
 
-#     Write-ScreenLog -Message "$($_)" -Level "fatal"
-#     try {
-#         Remove-OutlookComObject $OutlookApp
-#     }
-#     catch {
-#         exit
-#     }
-    
-# }
-main
+    # Create a detailed error message
+    $detailedMessage = "Error Type: $errorTypeName`r`nMessage: $($_.Exception.Message)`r`nStack Trace: $errorStackTrace"
+
+    # Log the detailed error message
+    Write-ScreenLog -Message $detailedMessage -Level "fatal"
+
+    try {
+        Remove-OutlookComObject $OutlookApp
+    }
+    catch {
+        # Optionally, you might want to log this secondary error as well
+        Write-ScreenLog -Message "Failed to remove Outlook COM Object: $($_.Exception.Message)" -Level "fatal"
+        exit
+    }
+}
