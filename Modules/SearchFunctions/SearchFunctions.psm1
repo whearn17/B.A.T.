@@ -36,11 +36,14 @@ function Search-ForMessageIDsInOutlook {
 
     # Iterate over all provided PSTs
     foreach ($PST in $PSTs) {
+        Write-FileLog -Message "Working on PST -> $($PST.DisplayName)" -Level "info"
+
         $rootFolder = $PST.GetRootFolder()
         $allFolders = Get-PSTFoldersRecursive -Folder $rootFolder
 
         # Iterate over all folders
         foreach ($folder in $allFolders) {
+            Write-FileLog -Message "Working on folder $($folder.DisplayName)" -Level "info"
             # Iterate over each mail item in the folder
             foreach ($mail in $folder.Items) {
 
