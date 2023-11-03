@@ -4,13 +4,16 @@ function Write-ScreenLog {
         [String]$Level
     )
 
+    # Store the formatted date in a variable
+    $currentDate = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+
     switch ($Level) {
-        "debug" { Write-Host "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [DEBUG]    $Message" -ForegroundColor Gray }
-        "info" { Write-Host "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [INFO]     $Message" -ForegroundColor White }
-        "warning" { Write-Host "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [WARNING]  $Message" -ForegroundColor Yellow }
-        "error" { Write-Host "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [ERROR]    $Message" -ForegroundColor Red }
-        "fatal" { Write-Host "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [FATAL]    $Message" -ForegroundColor DarkRed }
-        default { Write-Host "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [UNKNOWN]  $Message" -ForegroundColor Magenta }
+        "debug"   { Write-Host "$($currentDate) [DEBUG]    $Message" -ForegroundColor Gray }
+        "info"    { Write-Host "$($currentDate) [INFO]     $Message" -ForegroundColor White }
+        "warning" { Write-Host "$($currentDate) [WARNING]  $Message" -ForegroundColor Yellow }
+        "error"   { Write-Host "$($currentDate) [ERROR]    $Message" -ForegroundColor Red }
+        "fatal"   { Write-Host "$($currentDate) [FATAL]    $Message" -ForegroundColor DarkRed }
+        default   { Write-Host "$($currentDate) [UNKNOWN]  $Message" -ForegroundColor Magenta }
     }
 }
 
