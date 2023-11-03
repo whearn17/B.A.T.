@@ -58,6 +58,7 @@ function Search-ForMessageIDsInOutlook {
                     # Check if found ID matches any in the provided list
                     if ($targetIDsHash.ContainsKey($foundID)) {
                         Write-ScreenLog -Message "[+] Matched Message-ID: $foundID with Subject: $($mail.Subject)" -Level "info"
+                        Write-FileLog -Message "[+] Matched Message-ID: $foundID with Subject: $($mail.Subject)" -Level "info"
 
                         $targetIDsHash[$foundID] = $true  # Mark as found
 
@@ -79,12 +80,15 @@ function Search-ForMessageIDsInOutlook {
     $notFoundMessageIDs = $targetIDsHash.Keys | Where-Object { $targetIDsHash[$_] -eq $false }
     if ($notFoundMessageIDs.Count -gt 0) {
         Write-ScreenLog -Message "The following Message-IDs were not found:" -Level "warning"
+        Write-FileLog -Message "The following Message-IDs were not found:" -Level "warning"
         $notFoundMessageIDs | ForEach-Object {
             Write-ScreenLog -Message "[-] $_" -Level "warning"
+            Write-FileLog -Message "[-] $_" -Level "warning"
         }
     }
     else {
         Write-ScreenLog -Message "All provided Message-IDs were found." -Level "info"
+        Write-FileLog -Message "All provided Message-IDs were found." -Level "info"
     }
 }
 

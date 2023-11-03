@@ -31,6 +31,7 @@ function main {
     }
 
     Write-ScreenLog -Message "`n`nSearching for $(($messageIDs).Count) message ID(s)`n" -Level "info"
+    Write-FileLog -Message "`n`nSearching for $(($messageIDs).Count) message ID(s)`n" -Level "info"
     
     $OutlookApp = New-OutlookComObject
 
@@ -46,6 +47,7 @@ function main {
     $PSTs = Get-OutlookConnectedPSTs $OutlookApp
 
     Write-ScreenLog -Message "`nAttached PSTs:`n$($PSTs | ForEach-Object { $_.DisplayName } | Out-String)" -Level "info"
+    Write-FileLog -Message "`nAttached PSTs:`n$($PSTs | ForEach-Object { $_.DisplayName } | Out-String)" -Level "info"
 
     # If the user wants to save to a PST
     if (-not($PSTDisplayName -eq "")) {
@@ -55,6 +57,7 @@ function main {
         }
 
         Write-ScreenLog -Message "`nCreating new PST -> $($PSTDisplayName)" -Level info
+        Write-FileLog -Message "`nCreating new PST -> $($PSTDisplayName)" -Level info
 
         $TargetPST = New-PST -OutlookApp $OutlookApp -PSTDisplayName $PSTDisplayName
 
@@ -80,13 +83,14 @@ catch {
 
     # Log the detailed error message
     Write-ScreenLog -Message $detailedMessage -Level "fatal"
+    Write-FileLog -Message $detailedMessage -Level "fatal"
 
     try {
         Remove-OutlookComObject $OutlookApp
     }
     catch {
-        # Optionally, you might want to log this secondary error as well
         Write-ScreenLog -Message "Failed to remove Outlook COM Object: $($_.Exception.Message)" -Level "fatal"
+        Write-FileLog -Message "Failed to remove Outlook COM Object: $($_.Exception.Message)" -Level "fatal"
         exit
     }
 }
