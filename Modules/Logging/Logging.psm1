@@ -17,14 +17,8 @@ function Write-ScreenLog {
 function Write-FileLog {
     param (
         [String]$Message,
-        [String]$Level,
-        [String]$FilePath
+        [String]$Level
     )
-
-    # Ensure that the file path is provided
-    if (-not $FilePath) {
-        throw "File path must be provided"
-    }
 
     # Construct the log message similar to Write-ScreenLog
     $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
@@ -38,5 +32,5 @@ function Write-FileLog {
     }
 
     # Append the log message to the file
-    Add-Content -Path $FilePath -Value $logMessage
+    Add-Content -Path $global:LogFile -Value $logMessage
 }
