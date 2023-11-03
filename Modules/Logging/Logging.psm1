@@ -15,5 +15,28 @@ function Write-ScreenLog {
 }
 
 function Write-FileLog {
+    param (
+        [String]$Message,
+        [String]$Level,
+        [String]$FilePath
+    )
 
+    # Ensure that the file path is provided
+    if (-not $FilePath) {
+        throw "File path must be provided"
+    }
+
+    # Construct the log message similar to Write-ScreenLog
+    $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+    switch ($Level) {
+        "debug" { $logMessage = "$timestamp [DEBUG]    $Message" }
+        "info" { $logMessage = "$timestamp [INFO]     $Message" }
+        "warning" { $logMessage = "$timestamp [WARNING]  $Message" }
+        "error" { $logMessage = "$timestamp [ERROR]    $Message" }
+        "fatal" { $logMessage = "$timestamp [FATAL]    $Message" }
+        default { $logMessage = "$timestamp [UNKNOWN]  $Message" }
+    }
+
+    # Append the log message to the file
+    Add-Content -Path $FilePath -Value $logMessage
 }
