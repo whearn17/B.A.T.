@@ -172,12 +172,19 @@ function Get-MessageByItemID {
         [System.__ComObject]$OutlookApp,
 
         [Parameter(Mandatory = $true)]
-        [string[]]$TargetItemIDs
+        [string[]]$TargetItemIDs,
+
+        [Parameter(Mandatory = $true)]
+        [System.__ComObject]$TargetPST
     )
 
     foreach ($TargetItemID in $TargetItemIDs) {
         $mailItem = $OutlookApp.GetItemFromID($TargetItemID)
-        # Save mail item or something
+        
+        Save-MailItemToPST -MailItem $mailItem -TargetPST $TargetPST
+
+        [System.Runtime.InteropServices.Marshal]::ReleaseComObject($mailItem) | Out-Null
+        $mailItem = $null
     }
 
 }
