@@ -9,7 +9,17 @@ param (
 Import-Module .\Modules\OutlookAPI\OutlookAPI.psm1
 Import-Module .\Modules\SearchFunctions\SearchFunctions.psm1
 Import-Module .\Modules\Logging\Logging.psm1
+
+$applicationName = "BAT"
+$environment = "Prod"
+$startDateScript = Get-Date -Format "yyyy-MM-HH-mm-ss"
+
+$global:LogFile = "$(Get-Location)\Logs\$($applicationName)_$($environment)_$($startDateScript).log"
 function main {
+    if (-not(Test-Path $global:LogFile)) {
+        New-item -Path $global:LogFile | Out-Null
+    }
+
     if (-not(Test-Path $MessageIDFile)) {
         throw "MessageIDFile does not exist -> $($MessageIDFile)"
     }
