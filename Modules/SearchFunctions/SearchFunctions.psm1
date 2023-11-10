@@ -105,7 +105,7 @@ function Get-NormalizedSubject {
     return ($Subject -replace '[\W]', '').ToLower()
 }
 
-function Get-MessageIDsBySubject {
+function Get-MessagesBySubject {
     param (
         [Parameter(Mandatory = $true)]
         [System.__ComObject[]]$PSTs,
@@ -113,8 +113,8 @@ function Get-MessageIDsBySubject {
         [Parameter(Mandatory = $true)]
         [string[]]$TargetSubjects,
 
-        [Parameter(Mandatory = $true)]
-        [string]$OutputDirectory
+        [Parameter(Mandatory = $false)]
+        [System.__ComObject]$TargetPST
     )
 
     # Normalize target subjects for comparison
@@ -123,13 +123,6 @@ function Get-MessageIDsBySubject {
         $normalizedSubject = Get-NormalizedSubject -Subject $subject
         $targetSubjectsHash[$normalizedSubject] = $false  # Initialize with 'false' indicating not yet found
     }
-
-    # Ensure the output directory exists
-    if (-not (Test-Path $OutputDirectory)) {
-        New-Item -Path $OutputDirectory -ItemType Directory
-    }
-
-    $outputFile = Join-Path -Path $OutputDirectory -ChildPath 'MatchedMessageIDs.txt'
     
     # Iterate over all provided PSTs
     foreach ($PST in $PSTs) {
@@ -145,15 +138,17 @@ function Get-MessageIDsBySubject {
 
                 $currentSubject = Get-NormalizedSubject -Subject $mail.Subject
         
-                # Guard clause
                 if (-not $targetSubjectsHash.ContainsKey($currentSubject)) { continue }
         
-                Write-Host "[+] Matched Subject: $($mail.Subject) with Message-ID: $($mail.EntryID)" -ForegroundColor Green
-                Write-Host "Message Class: $($mail.MessageClass)" -ForegroundColor Blue
-                $mail.PropertyAccessor.GetProperty("http://schemas.microsoft.com/mapi/proptag/0x007D001E") | Out-Host 
+                Write-ScreenLog -Message "[+] Matched Subject: $currentSubject" -Level "info"
+                Write-FileLog -Message "[+] Matched Subject: $currentSubject" -Level "info"
 
-                Add-Content -Path $outputFile -Value ("$($mail.Subject)`t$($mail.EntryID)")
                 $targetSubjectsHash[$currentSubject] = $true
+
+                # Check to make sure the user passed in a targetPST to save to
+                if (-not($null -eq $TargetPST)) {
+                    Save-MailItemToPST -MailItem $mail -TargetPST $TargetPST
+                }                
             }            
         }        
     }
@@ -162,13 +157,16 @@ function Get-MessageIDsBySubject {
     # Report any subjects that weren't found
     $notFoundSubjects = $targetSubjectsHash.Keys | Where-Object { $targetSubjectsHash[$_] -eq $false }
     if ($notFoundSubjects.Count -gt 0) {
-        Write-Host "The following normalized subjects were not found:" -ForegroundColor Yellow
+        Write-ScreenLog -Message "The following subjects were not found:" -Level "warning"
+        Write-FileLog -Message "The following subjects were not found:" -Level "warning"
         $notFoundSubjects | ForEach-Object {
-            Write-Host "[-] $_" -ForegroundColor Red
+            Write-ScreenLog -Message "[-] $_" -Level Warning
+            Write-FileLog -Message "[-] $_" -Level Warning
         }
     }
     else {
-        Write-Host "All provided subjects were found and their corresponding Message-IDs written to $outputFile." -ForegroundColor Green
+        Write-ScreenLog -Message "All provided subjects were found and their corresponding Message-IDs written to $outputFile." -Level "info"
+        Write-FileLog -Message "All provided subjects were found and their corresponding Message-IDs written to $outputFile." -Level "info"
     }
 }
 
