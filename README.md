@@ -1,6 +1,6 @@
 # B.A.T. - BEC Analysis Toolkit
 
-(https://imgur.com/a/OCnXC8x)
+![](https://imgur.com/a/OCnXC8x)
 
 ## TODO
 
