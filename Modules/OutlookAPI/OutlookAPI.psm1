@@ -17,14 +17,24 @@ function Remove-OutlookComObject {
 function Get-OutlookConnectedPSTs {
     param (
         [Parameter(Mandatory = $true)]
-        [System.__ComObject]$OutlookNamespace
+        [System.__ComObject]$OutlookNamespace,
+
+        # Optional switch parameter to include the default PST
+        [Parameter()]
+        [Switch]$IncludeDefault
     )
 
     $ConnectedPSTs = @()
 
     # Loop through all stores in the provided Outlook namespace
     foreach ($store in $OutlookNamespace.Stores) {
-        $ConnectedPSTs += $store
+        # Check if the store is a PST file
+        if ($store.FilePath -like "*.pst") {
+            # Include the store if it's not the default store or if the IncludeDefault switch is used
+            if ($IncludeDefault -or $store.ExchangeStoreType -ne [Microsoft.Office.Interop.Outlook.OlExchangeStoreType]::olExchangeMailbox) {
+                $ConnectedPSTs += $store
+            }
+        }
     }
 
     return $ConnectedPSTs
