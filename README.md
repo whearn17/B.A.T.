@@ -1,5 +1,7 @@
 # B.A.T. - BEC Analysis Toolkit
 
+![](https://user-images.githubusercontent.com/74379583/282949817-f29e4cf2-df1e-4065-8e69-88335d3c23d5.png)
+
 ## TODO
 
 * Add more unit testing
