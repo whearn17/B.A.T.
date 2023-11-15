@@ -8,12 +8,12 @@ function Write-ScreenLog {
     $currentDate = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
 
     switch ($Level) {
-        "debug"   { Write-Host "$($currentDate) [DEBUG]    $Message" -ForegroundColor Gray }
-        "info"    { Write-Host "$($currentDate) [INFO]     $Message" -ForegroundColor White }
+        "debug" { Write-Host "$($currentDate) [DEBUG]    $Message" -ForegroundColor Gray }
+        "info" { Write-Host "$($currentDate) [INFO]     $Message" -ForegroundColor White }
         "warning" { Write-Host "$($currentDate) [WARNING]  $Message" -ForegroundColor Yellow }
-        "error"   { Write-Host "$($currentDate) [ERROR]    $Message" -ForegroundColor Red }
-        "fatal"   { Write-Host "$($currentDate) [FATAL]    $Message" -ForegroundColor DarkRed }
-        default   { Write-Host "$($currentDate) [UNKNOWN]  $Message" -ForegroundColor Magenta }
+        "error" { Write-Host "$($currentDate) [ERROR]    $Message" -ForegroundColor Red }
+        "fatal" { Write-Host "$($currentDate) [FATAL]    $Message" -ForegroundColor DarkRed }
+        default { Write-Host "$($currentDate) [UNKNOWN]  $Message" -ForegroundColor Magenta }
     }
 }
 
